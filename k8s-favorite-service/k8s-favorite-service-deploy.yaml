@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-backend-user-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8s-favorite-service
+  template:
+    metadata:
+      labels:
+        app: k8s-favorite-service
+    spec:
+      containers:
+      - name: favorite-service
+        image: seoyoun8694/favorite-service:0.0.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /backend/favorite/v1/k8s/liveness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          failureThreshold: 3
+          timeoutSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /backend/favorite/v1/k8s/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5 
+          failureThreshold: 3
+          timeoutSeconds: 3
+
+        volumeMounts:
+          - mountPath: /etc/config
+            name: favorite-service-config-volume
+          - mountPath: /etc/secret
+            name: favorite-service-secret-volume
+
+      volumes:
+        - name: favorite-service-config-volume
+          configMap:
+            name: favorite-service-config
+            items:
+              - key: application-dev.yml
+                path: application-dev.yml
+        - name: favorite-service-secret-volume
+          secret:
+            secretName: favorite-service-secret
+            items:
+              - key: application-secret.yml
+                path: application-secret.yml

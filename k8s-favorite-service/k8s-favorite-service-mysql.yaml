@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-favorite-service-jdbc
+spec:
+  ports:
+    - port: 3306
+
+---
+
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: k8s-favorite-service-jdbc
+subsets:
+  - addresses:
+      - ip: 192.168.219.103
+    ports:
+      - port: 13308
