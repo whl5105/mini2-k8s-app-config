@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-backend-user-deployment
+spec:
+  replicas: 3  # 원하는 파드 복제본 수 (기본값: 1)
+  selector:
+    matchLabels:
+      app: k8s-interest-service  # 템플릿의 labels와 일치해야 함
+  template:
+    metadata:
+      labels:
+        app: k8s-interest-service  # selector와 일치해야 함
+    spec:
+      containers:
+      - name: interest-service
+        image: soob0717/interest-service:0.0.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /backend/interest/v1/k8s/liveness  # 스프링 부트 생존 상태 엔드포인트
+            port: 8080
+          initialDelaySeconds: 30   # 컨테이너 시작 후 첫 검사까지 대기
+          periodSeconds: 5          # 5초마다 체크
+          failureThreshold: 3       # 3회 연속 실패 시 컨테이너 재시작
+          timeoutSeconds: 3         # 3초 내 응답 필요
+
+        # Readiness Probe 추가 (트래픽 유입 제어용)
+        readinessProbe:
+          httpGet:
+            path: /backend/interest/v1/k8s/readiness  # 스프링 부트 준비 상태 엔드포인트
+            port: 8080
+          initialDelaySeconds: 30   # 컨테이너 시작 후 첫 검사까지 대기
+          periodSeconds: 5          # 5초마다 체크
+          failureThreshold: 3       # 3회 연속 실패 시 서비스 트래픽 중지
+          timeoutSeconds: 3         # 3초 내 응답 필요
+
+        volumeMounts:
+          - mountPath: /etc/config
+            name: interest-service-config-volume
+          - mountPath: /etc/secret
+            name: interest-service-secret-volume
+
+      volumes:
+        - name: interest-service-config-volume
+          configMap:
+            name: interest-service-config
+            items:
+              - key: application-dev.yml
+                path: application-dev.yml
+        - name: interest-service-secret-volume
+          secret:
+            secretName: interest-service-secret
+            items:
+              - key: application-secret.yml
+                path: application-secret.yml
