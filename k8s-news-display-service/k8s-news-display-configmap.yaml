@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: news-display-config
+data:
+  application-dev.yml: |
+    server:
+      port: 8080
+    # url 이랑 드라이버클래스네임은 정확한지 확인해야함 - 0621
+    spring:
+      datasource:
+        url: jdbc:mariadb://k8s-external-news-display-maria-service:3306/mini2?serverTimezone=UTC&useSSL=true&autoReconnect=true&useUnicode=true&characterEncoding=utf-8
+        
+        driver-class-name: org.mariadb.jdbc.Driver
+        hikari:
+          connection-test-query: SELECT 1 # HikariCP 유효성 검사 추가
+      jpa:
+        database-platform: org.hibernate.dialect.MariaDBDialect
+        hibernate:
+          ddl-auto: create  
+        show-sql: true
+        properties:
+          hibernate:
+            format_sql: true
+
+      ai:
+        openai:
+          api-key: ${OPENAI_API_KEY} # .env 파일의 OPENAI_API_KEY 변수 참조
+          chat:
+            options:
+              model: gpt-4o
+
+      kafka:
+        producer:
+          bootstrap-servers: localhost:9092
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer # ✅ 이 부분 변경
+
+        consumer:
+          group-id: news-display-service-group
+          enable-auto-commit: false # MANUAL AckMode 사용 시 필수
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer # ✅ 이 부분 확인
+        listener:
+          ack-mode: MANUAL
+
+    jwt:
+      expires-in: 86400 # 1day
+      mobile-expires-in: 31536000
+      table-expires-in: 31536000
