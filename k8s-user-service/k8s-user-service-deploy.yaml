@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-user-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8s-user-service
+  template:
+    metadata:
+      labels:
+        app: k8s-user-service
+    spec:
+      containers:
+        - name: k8s-user-service
+          image: suin4328/user-service:0.0.2
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: dev
+          ports:
+            - containerPort: 8080
+
+          volumeMounts:
+            - name: user-service-config-volume
+              mountPath: /etc/config
+            - name: user-service-secret-volume
+              mountPath: /etc/secret
+
+      volumes:
+        - name: user-service-config-volume
+          configMap:
+            name: user-service-config
+            items:
+              - key: application-dev.yml
+                path: application-dev.yml
+        - name: user-service-secret-volume
+          secret:
+            secretName: user-service-secret
+            items:
+              - key: application-secret.yml
+                path: application-secret.yml
