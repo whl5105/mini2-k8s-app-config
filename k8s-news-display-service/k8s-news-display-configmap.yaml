@@ -25,7 +25,6 @@ data:
 
       ai:
         openai:
-          api-key: ${OPENAI_API_KEY} # .env 파일의 OPENAI_API_KEY 변수 참조
           chat:
             options:
               model: gpt-4o
