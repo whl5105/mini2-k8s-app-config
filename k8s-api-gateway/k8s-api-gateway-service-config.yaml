@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+data:
+  application-dev.yml: |
+    server:
+      port: 8080
+
+    spring:
+      cloud:
+        gateway:
+          mvc:
+            routes:
+              - id: favorite
+                uri: http://k8s-favorite-service:8080
+                predicates:
+                  - Path=/api/favorite/v1/**
