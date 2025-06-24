@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: interest-service-config
+  name: favirite-service-config
 data:
   application-dev.yml:  |
     server:
