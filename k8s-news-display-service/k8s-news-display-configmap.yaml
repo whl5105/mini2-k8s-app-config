@@ -14,11 +14,37 @@ data:
         driver-class-name: com.mariadb.cj.jdbc.Driver
         hikari:
           connection-test-query: SELECT 1 # HikariCP 유효성 검사 추가
-    jpa:
-      hibernate:
-        ddl-auto: create # 오직 테스트 환경에서만
-        generate-ddl: true # 오직 테스트 환경에서만
+      jpa:
+        database-platform: org.hibernate.dialect.MariaDBDialect
+        hibernate:
+          ddl-auto: create
         show-sql: true
-      open-in-view: false
-    kafka:
-      bootstrap-servers: localhost:9092
+        properties:
+          hibernate:
+            format_sql: true
+
+      ai:
+        openai:
+          api-key: ${OPENAI_API_KEY} # .env 파일의 OPENAI_API_KEY 변수 참조
+          chat:
+            options:
+              model: gpt-4o
+
+      kafka:
+        producer:
+          bootstrap-servers: localhost:9092
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer # ✅ 이 부분 변경
+
+        consumer:
+          group-id: news-display-service-group
+          enable-auto-commit: false # MANUAL AckMode 사용 시 필수
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer # ✅ 이 부분 확인
+        listener:
+          ack-mode: MANUAL
+
+    jwt:
+      expires-in: 86400 # 1day
+      mobile-expires-in: 31536000
+      table-expires-in: 31536000
