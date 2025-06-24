@@ -15,6 +15,9 @@ spec:
       containers:
       - name: favorite-service
         image: seoyoun8694/favorite-service:0.0.1
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: dev
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
