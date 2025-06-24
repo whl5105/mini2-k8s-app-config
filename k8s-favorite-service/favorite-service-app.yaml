@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: favorite-service
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/PersonalizedNews-MSA/k8s-app-config.git
+    targetRevision: HEAD
+    path: k8s-favorite-service/prd
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+    syncOptions:
+      - CreateNamespace=true
