@@ -9,15 +9,15 @@ data:
     # url 이랑 드라이버클래스네임은 정확한지 확인해야함 - 0621
     spring:
       datasource:
-        url: jdbc:mariadb://k8s-external-news-display-maria-service:3306/news?serverTimezone=UTC&useSSL=true&autoReconnect=true&useUnicode=true&characterEncoding=utf-8
+        url: jdbc:mariadb://k8s-external-news-display-maria-service:3306/mini2?serverTimezone=UTC&useSSL=true&autoReconnect=true&useUnicode=true&characterEncoding=utf-8
         
-        driver-class-name: com.mariadb.cj.jdbc.Driver
+        driver-class-name: org.mariadb.jdbc.Driver
         hikari:
           connection-test-query: SELECT 1 # HikariCP 유효성 검사 추가
       jpa:
         database-platform: org.hibernate.dialect.MariaDBDialect
         hibernate:
-          ddl-auto: create
+          ddl-auto: create  
         show-sql: true
         properties:
           hibernate:
